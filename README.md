@@ -40,4 +40,4 @@
 	- redis的依赖
 	
 ### git下载
-``` git -clone 
+``` git -clone https://github.com/FlyMonkey134/store ```

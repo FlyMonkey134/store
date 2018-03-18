@@ -38,3 +38,6 @@
 - pytz==2017.3
 - redis==2.10.6
 	- redis的依赖
+	
+### git下载
+``` git -clone 

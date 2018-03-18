@@ -1,0 +1,75 @@
+{% extends 'user_base.html' %}
+{% load tags %}
+
+{% block user_content %}
+
+    <div class="right_content clearfix">
+        <h3 class="common_title2">全部订单</h3>
+        {% for item in items %}
+          <ul class='order_list_th w978 clearfix'>
+            <li class='col01'>{{ item.order_main.order_time }}</li>
+            <li class="">订单号：{{ item.order_main.uuid }}</li>
+            <li class='col01 stress'>{{ item.order_main.get_is_pay_display }}</li>
+          </ul>
+
+            <table class="order_list_table w980">
+                <tbody>
+                <tr>
+                    <td width="55%">
+                      {{ order_details }}
+                        {% for order in item.order_details %}
+                            <ul class="order_goods_list clearfix">
+                                <li class="col01"><img src="{{ MEDIA_URL }}{{ order.goods_info.images }}">
+                                </li>
+                                <li class="col02">{{ order.goods_info.name|truncatechars:20 }}<em>{{ order.goods_info.price }}元/{{ order_detail.goods_info.unit }}</em>
+                                </li>
+                                <li class="col03">{{ order.count }}</li>
+                                <li class="col04">{{ order.goods_total }}元</li>
+                            </ul>
+                        {% endfor %}
+                    </td>
+                    <td width="15%"><em>{{ item.order_main.total }}</em>元</td>
+                    <td width="15%">{{ item.order_main.get_is_pay_display }}</td>
+                    <td width="15%" id='state'>
+                        {% if item.order_main.is_pay == '1' %}
+                          <a href="#" class="oper_btn">去付款</a>
+                          <a href="javascript:" class="cannel_order" data_id="{{ item.order_main.id }}">取消订单</a>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+
+        {% empty %}
+            <h3>暂时没有订单啊！！赶紧去买啊！！！</h3>
+        {% endfor %}
+        {% smart_page curr_page page 'account:user_center_order' request.get_full_path %}
+    </div>
+
+     <script>
+        $(function(){
+            $(".cannel_order").on("click", function(){
+                var order_id = $(this).attr("data_id");
+                data = {
+                    "order_id": order_id
+                }
+                if(confirm("是否确认取消订单？")){
+                    $.ajax({
+                       type: "get",
+                      url: '{% url 'show_order:cancel_order' %}',
+                       data: data,
+                       success: function(res){
+                           if(res.code == -1){
+                               location.href = "/user/login/";
+                           }else if(res.code == 0){ 
+                                alert( "成功: ");
+                           }
+                       }
+                    });
+                };
+            });
+        });
+    </script>
+{% endblock user_content %}
+

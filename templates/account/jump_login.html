@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    激活成功
+{% endblock title %}
+{% block js%}
+    <script type="text/javascript" src="{% static 'js/jump_login.js' %}"></script>
+{% endblock js %}
+{% block content %}
+    <a href="{% url 'account:login' %}" id="jump"></a>
+{% endblock content %}

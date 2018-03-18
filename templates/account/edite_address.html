@@ -1,0 +1,75 @@
+<!-- Modal -->
+<div class="modal fade" id="myModal_1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">修改收获人信息</h4>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'account:user_edit_submit' %}" id="modal-form" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="data_id" value="">
+                    <div class="form-group">
+                        <label for="">收货人</label>
+                        <input type="text" name="recipients" class="form-control" placeholder="请填写收货人" value="{{ info.name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="">城市</label>
+                        <input type="text" name="city" class="form-control" placeholder="填写所在城市">
+                    </div>
+                    <div class="form-group">
+                        <label for="">联系电话</label>
+                        <input type="text" name="telphone" class="form-control" placeholder="填写有效的练习电话">
+                    </div>
+                    <div class="form-group">
+                        <label for="">详细地址</label>
+                        <textarea name="address" class="form-control" cols="7" rows="3"
+                                  placeholder="请填写详细的地址"></textarea>
+                    </div>
+                    <div id="error_edit" style="color: red"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取&nbsp;&nbsp;消</button>
+                        <button type="submit" class="btn btn-primary">确&nbsp;&nbsp;定</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function(){
+        $('#modal-form').submit(function () {
+            data = $(this).serializeArray();
+
+            $.ajax({
+                type: 'POST',
+                url: '{% url 'account:user_edit_submit' %}',
+                dataType: 'json',
+                data: data,
+
+                success: function (msg) {
+
+                    // 如果返回的status = 0 ，就说明操作成功，则跳转，不为0，说明有异常
+                    if(msg.status == 0){
+                        window.location.href = '{% url 'account:user_center_site' %}'
+                    }else{
+                        var err = '';
+                        for(var i in msg.errors) {
+                             err += i + ':' + msg.errors[i] + '<br>';
+                        }
+                        $('#error_edit').html(err);
+                    }
+
+                    }
+
+
+            })
+            // return false  因为这里是一个表单提交事件，如果不return false，则会把该表单提交
+            return false;
+        })
+    })
+</script>

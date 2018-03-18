@@ -1,0 +1,126 @@
+{% extends 'user_base.html' %}
+{% load static %}
+{% block user_content %}
+    {% block css %}
+        <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    {% endblock css %}
+    {% block js %}
+        <script type="text/javascript" src="{% static 'bootstrap/js/jquery.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    {% endblock js %}
+    <div class="right_content clearfix">
+        <div>
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li class="{{ message.tags }}">
+                            {{ message|safe }}
+                            <a href="#" class="close"> </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        <h3 class="common_title2">默认收货地址</h3>
+        <div class="site_con">
+            <dl>
+                <dt>当前地址:</dt>
+                {% if request.user.delivertaddress %}
+                <dd id="moren">{{ request.user.delivertaddress.recipients }}&nbsp;&nbsp;
+                    &nbsp;&nbsp;{{ request.user.delivertaddress.address }}&nbsp;&nbsp;
+                    （{{ request.user.user.delivertaddress.recipients }} 收）&nbsp;&nbsp; {{ request.user.delivertaddress.telphone }}</dd>
+                {% else %}
+                <dd id="moren"></dd>
+                {% endif %}
+            </dl>
+            {% for info in receiver_infos %}
+                <div class="panel panel-default block_{{info.id}}">
+                    <div class="panel-heading">
+                        <p><span style="font-size: 18px" id="name{{ forloop.counter }}">{{ info.recipients }}</span>&nbsp;&nbsp;
+                            <span
+                                    style="margin-left: 30px"
+                                    id="telephone{{ forloop.counter }}">{{ info.telphone }}</span></p>
+                        <div id="address{{ forloop.counter }}">
+                            {{ info.address }}
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <input type="radio" name="address_check" class="pull-left" {% if request.user.delivertaddress.id == info.id %}checked="checked"{% endif %} data_id="{{info.id}}">&nbsp;&nbsp;设置为默认地址
+                        <span class="pull-right"><a href="#"
+                                                    class="btn btn-danger btn-danger-del" data_id="{{info.id}}">删除</a></span>
+                        <span class="pull-right"><a type="button" class="btn btn-primary pull-right edit_form" data-toggle="modal"
+                                                     data_id="{{ info.id }}" style="margin-right: 10px">编辑</a></span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% include 'account/receiver_address.html' %}
+        {% include 'account/edite_address.html' %}
+    </div>
+    <script>
+        $(function () {
+            var $radio = $(".site_con input[type='radio']");
+            $radio.click(function(){
+                var data_id = $(this).attr("data_id");
+                var $input = $(this);
+
+                if($(this).is(":checked")){
+                    $.get("{% url 'account:user_center_set_site' %}",{'data_id':data_id}, function(data){
+                        if(data.status == 0) {
+                            $("#moren").html(data.recipients + '&nbsp;&nbsp;&nbsp;&nbsp;' + data.city
+                                + '&nbsp;&nbsp;&nbsp;&nbsp;' + data.address + '&nbsp;&nbsp;' + '（' + data.recipients
+                                + '收）&nbsp;&nbsp;' + data.telphone);
+                        }else{
+                            alert('设置失败');
+                            $input.attr('checked',false)
+                        }
+                    });
+                }
+            });
+
+            $(".btn-danger-del").click(function(){
+                var data_id = $(this).attr("data_id");
+                if(confirm("是否确认删除?")){
+                    $.get("{% url 'account:user_conter_del_site' %}" , {'data_id':data_id}, function(result){
+                        if(result.status==0){
+                            alert("删除成功");
+                            $(".block_" + data_id).remove();
+                            if(result.is_default == 0){
+                                $('#moren').html('')
+                            }else {
+                                alert('删除失败1')
+                            }
+                        }else {
+                            alert('删除失败2')
+                        }
+                    });
+                }
+            });
+                $('.edit_form').click(function () {
+
+                    data_id = $(this).attr('data_id');
+
+                    $.ajax({
+                        type: 'GET',
+                        url: '{% url 'account:user_edit_address' %}',
+                        dataType: 'json',
+                        data:{'data_id':data_id},
+
+                        success: function (msg) {
+                            $('#myModal_1').modal('toggle');
+                            if(msg.status == 1){
+                                $("input[name='recipients']").val(msg.recipients);
+                                $("input[name='city']").val(msg.city);
+                                $("input[name='telphone']").val(msg.telphone);
+                                $("textarea[name='address']").val(msg.address);
+                                $("input[name='data_id']").val(data_id);
+                            }
+                            return false
+                        }
+
+                    });
+                })
+
+        })
+    </script>
+{% endblock user_content %}
